@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=3.0">
+    <title>Quiz Básico de Gasometria Arterial</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .quiz-container {
+            padding: 30px;
+        }
+
+        .question {
+            margin-bottom: 40px;
+            border-left: 4px solid #3498db;
+            padding-left: 20px;
+            background: #f8f9fa;
+            border-radius: 0 10px 10px 0;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .question:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .question-number {
+            color: #3498db;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .gasometry-values {
+            background: #e8f4f8;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            border-left: 4px solid #2980b9;
+            font-size: 1.2em;
+            text-align: center;
+        }
+
+        .gasometry-values div {
+            margin: 8px 0;
+        }
+
+        .gasometry-values strong {
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        .options {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .option {
+            margin: 10px 0;
+            padding: 18px;
+            background: #ffffff;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            font-size: 1.1em;
+            font-weight: 500;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .option:hover {
+            border-color: #3498db;
+            background: #f8f9fa;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #e74c3c;
+            background: #fadbd8;
+        }
+
+        .option.correct {
+            border-color: #27ae60;
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+
+        .option.correct::after {
+            content: "✓ CORRETO";
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .explanation {
+            margin-top: 15px;
+            padding: 20px;
+            background: #e8f6f3;
+            border-radius: 8px;
+            border-left: 4px solid #27ae60;
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .explanation h4 {
+            color: #27ae60;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .explanation .step {
+            margin: 8px 0;
+            padding: 8px;
+            background: white;
+            border-radius: 5px;
+            border-left: 3px solid #27ae60;
+        }
+
+        .score {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .reset-button {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .reset-button:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(0,0,0,0.3);
+        }
+
+        .reset-button:active {
+            transform: translateY(0);
+        }
+
+        .reference-values {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .reference-values h3 {
+            color: #856404;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .ref-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            font-size: 1em;
+        }
+
+        .ref-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .interpretation-guide {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .interpretation-guide h3 {
+            color: #1565c0;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            font-size: 0.95em;
+        }
+
+        .guide-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #1976d2;
+        }
+
+        .guide-item h4 {
+            color: #1565c0;
+            margin-bottom: 8px;
+        }
+
+        .copyright {
+            background: #2c3e50;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9em;
+            border-top: 3px solid #3498db;
+        }
+
+        .copyright p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .quiz-footer {
+            background: #34495e;
+            padding: 30px;
+            text-align: center;
+            border-top: 3px solid #3498db;
+        }
+
+        .final-score {
+            background: #2c3e50;
+            color: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: inline-block;
+            min-width: 250px;
+        }
+
+        .reset-button-footer {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            font-size: 1em;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .reset-button-footer:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(0,0,0,0.3);
+        }
+
+        .reset-button-footer:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                margin: 0;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 25px 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+                margin-bottom: 8px;
+            }
+            
+            .header p {
+                font-size: 1em;
+            }
+            
+            .quiz-container {
+                padding: 20px 15px;
+            }
+
+            .question {
+                padding: 20px 15px;
+                margin-bottom: 30px;
+            }
+
+            .question-text {
+                font-size: 1em;
+            }
+
+            .gasometry-values {
+                padding: 15px;
+                font-size: 1.1em;
+            }
+
+            .option {
+                padding: 15px 12px;
+                font-size: 1em;
+                margin: 8px 0;
+            }
+
+            .option:hover {
+                transform: none;
+            }
+
+            .option.correct::after {
+                content: "✓";
+                font-size: 1.2em;
+            }
+            
+            .score {
+                position: static;
+                margin: 15px auto 10px;
+                text-align: center;
+                display: block;
+                width: fit-content;
+                padding: 12px 18px;
+                font-size: 0.95em;
+            }
+
+            .reset-button {
+                position: static;
+                margin: 0 auto 20px;
+                text-align: center;
+                display: block;
+                width: fit-content;
+                padding: 10px 16px;
+                font-size: 0.85em;
+            }
+
+            .reference-values, .interpretation-guide {
+                padding: 15px;
+                margin: 15px 0;
+            }
+
+            .ref-grid, .guide-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .ref-item, .guide-item {
+                padding: 12px;
+                font-size: 0.9em;
+            }
+
+            .explanation {
+                padding: 15px;
+                font-size: 0.95em;
+            }
+
+            .step {
+                padding: 8px;
+                margin: 6px 0;
+                font-size: 0.9em;
+            }
+
+            .copyright {
+                padding: 15px;
+                font-size: 0.8em;
+            }
+
+            .quiz-footer {
+                padding: 20px 15px;
+            }
+
+            .final-score {
+                font-size: 1em;
+                padding: 15px 20px;
+                min-width: 200px;
+                margin-bottom: 15px;
+            }
+
+            .reset-button-footer {
+                padding: 12px 20px;
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.6em;
+            }
+
+            .question {
+                border-left: 3px solid #3498db;
+                padding: 15px 12px;
+            }
+
+            .gasometry-values {
+                font-size: 1em;
+                padding: 12px;
+            }
+
+            .option {
+                padding: 12px 10px;
+                font-size: 0.95em;
+            }
+
+            .ref-item, .guide-item {
+                font-size: 0.85em;
+                padding: 10px;
+            }
+
+            .step {
+                font-size: 0.85em;
+            }
+        }
+    </style>
+</head>
+<body>
+            <div class="score" id="score">Pontuação: 0/10</div>
+        <button class="reset-button" id="resetButton" onclick="resetQuiz()">🔄 Reiniciar Quiz</button>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Quiz Básico de Gasometria</h1>
+            <p>Identifique o distúrbio ácido-base: pH, PaCO₂ e HCO₃⁻</p>
+        </div>
+
+        <div class="reference-values">
+            <h3>📊 Valores de Referência</h3>
+            <div class="ref-grid">
+                <div class="ref-item"><strong>pH:</strong> 7,35 - 7,45</div>
+                <div class="ref-item"><strong>PaCO₂:</strong> 35 - 45 mmHg</div>
+                <div class="ref-item"><strong>HCO₃⁻:</strong> 22 - 26 mEq/L</div>
+            </div>
+        </div>
+
+        <div class="interpretation-guide">
+            <h3>🔍 Guia de Interpretação</h3>
+            <div class="guide-grid">
+                <div class="guide-item">
+                    <h4>Acidose Respiratória</h4>
+                    pH ↓ + PaCO₂ ↑
+                </div>
+                <div class="guide-item">
+                    <h4>Alcalose Respiratória</h4>
+                    pH ↑ + PaCO₂ ↓
+                </div>
+                <div class="guide-item">
+                    <h4>Acidose Metabólica</h4>
+                    pH ↓ + HCO₃⁻ ↓
+                </div>
+                <div class="guide-item">
+                    <h4>Alcalose Metabólica</h4>
+                    pH ↑ + HCO₃⁻ ↑
+                </div>
+            </div>
+        </div>
+
+        <div class="quiz-container">
+            <!-- Questão 1 -->
+            <div class="question" data-question="1">
+                <div class="question-number">Questão 1</div>
+                <div class="question-text">
+                    Analise os seguintes valores gasométricos:
+                    <div class="gasometry-values">
+                        <div><strong>pH:</strong> 7,25</div>
+                        <div><strong>PaCO₂:</strong> 55 mmHg</div>
+                        <div><strong>HCO₃⁻:</strong> 24 mEq/L</div>
+                    </div>
+                    Qual é o distúrbio ácido-base?
+                </div>
+                <ul class="options">
+                    <li class="option" data-answer="a">Acidose Respiratória</li>
+                    <li class="option" data-answer="b">Acidose Metabólica</li>
+                    <li class="option" data-answer="c">Alcalose Respiratória</li>
+                    <li class="option" data-answer="d">Alcalose Metabólica</li>
+                </ul>
+                <div class="explanation">
+                    <h4>Raciocínio:</h4>
+                    <div class="step">1° Passo: pH = 7,25 (< 7,35) → ACIDOSE</div>
+                    <div class="step">2° Passo: PaCO₂ = 55 mmHg (> 45) → ELEVADO</div>
+                    <div class="step">3° Passo: HCO₃⁻ = 24 mEq/L (normal)</div>
+                    <div class="step"><strong>Conclusão:</strong> Acidose + PaCO₂ elevado = ACIDOSE RESPIRATÓRIA</div>
+                </div>
+            </div>
+
+            <!-- Questão 2 -->
+            <div class="question" data-question="2">
+                <div class="question-number">Questão 2</div>
+                <div class="question-text">
+                    Analise os seguintes valores gasométricos:
+                    <div class="gasometry-values">
+                        <div><strong>pH:</strong> 7,15</div>
+                        <div><strong>PaCO₂:</strong> 35 mmHg</div>
+                        <div><strong>HCO₃⁻:</strong> 12 mEq/L</div>
+                    </div>
+                    Qual é o distúrbio ácido-base?
+                </div>
+                <ul class="options">
+                    <li class="option" data-answer="a">Acidose Respiratória</li>
+                    <li class="option" data-answer="b">Acidose Metabólica</li>
+                    <li class="option" data-answer="c">Alcalose Respiratória</li>
+                    <li class="option" data-answer="d">Alcalose Metabólica</li>
+                </ul>
+                <div class="explanation">
+                    <h4>Raciocínio:</h4>
+                    <div class="step">1° Passo: pH = 7,15 (< 7,35) → ACIDOSE</div>
+                    <div class="step">2° Passo: HCO₃⁻ = 12 mEq/L (< 22) → BAIXO</div>
+                    <div class="step">3° Passo: PaCO₂ = 35 mmHg (normal)</div>
+                    <div class="step"><strong>Conclusão:</strong> Acidose + HCO₃⁻ baixo = ACIDOSE METABÓLICA</div>
+                </div>
+            </div>
+
+            <!-- Questão 3 -->
+            <div class="question" data-question="3">
+                <div class="question-number">Questão 3</div>
+                <div class="question-text">
+                    Analise os seguintes valores gasométricos:
+                    <div class="gasometry-values">
+                        <div><strong>pH:</strong> 7,52</div>
+                        <div><strong>PaCO₂:</strong> 28 mmHg</div>
+                        <div><strong>HCO₃⁻:</strong> 23 mEq/L</div>
+                    </div>
+                    Qual é o distúrbio ácido-base?
+                </div>
+                <ul class="options">
+                    <li class="option" data-answer="a">Acidose Respiratória</li>
+                    <li class="option" data-answer="b">Acidose Metabólica</li>
+                    <li class="option" data-answer="c">Alcalose Respiratória</li>
+                    <li class="option" data-answer="d">Alcalose Metabólica</li>
+                </ul>
+                <div class="explanation">
+                    <h4>Raciocínio:</h4>
+                    <div class="step">1° Passo: pH = 7,52 (> 7,45) → ALCALOSE</div>
+                    <div class="step">2° Passo: PaCO₂ = 28 mmHg (< 35) → BAIXO</div>
+                    <div class="step">3° Passo: HCO₃⁻ = 23 mEq/L (normal)</div>
+                    <div class="step"><strong>Conclusão:</strong> Alcalose + PaCO₂ baixo = ALCALOSE RESPIRATÓRIA</div>
+                </div>
+            </div>
+
+            <!-- Questão 4 -->
+            <div class="question" data-question="4">
+                <div class="question-number">Questão 4</div>
+                <div class="question-text">
+                    Analise os seguintes valores gasométricos:
+                    <div class="gasometry-values">
+                        <div><strong>pH:</strong> 7,50</div>
+                        <div><strong>PaCO₂:</strong> 42 mmHg</div>
+                        <div><strong>HCO₃⁻:</strong> 32 mEq/L</div>
+                    </div>
+                    Qual é o distúrbio ácido-base?
+                </div>
+                <ul class="options">
+                    <li class="option" data-answer="a">Acidose Respiratória</li>
+                    <li class="option" data-answer="b">Acidose Metabólica</li>
+                    <li class="option" data-answer="c">Alcalose Respiratória</li>
+                    <li class="option" data-answer="d">Alcalose Metabólica</li>
+                </ul>
+                <div class="explanation">
+                    <h4>Raciocínio:</h4>
+                    <div class="step">1° Passo: pH = 7,50 (> 7,45) → ALCALOSE</div>
+                    <div class="step">2° Passo: HCO₃⁻ = 32 mEq/L (> 26) → ELEVADO</div>
+                    <div class="step">3° Passo: PaCO₂ = 42 mmHg (normal)</div>
+                    <div class="step"><strong>Conclusão:</strong> Alcalose + HCO₃⁻ elevado = ALCALOSE METABÓLICA</div>
+                </div>
+            </div>
+
+            <!-- Questão 5 -->
+            <div class="question" data-question="5">
+                <div class="question-number">Questão 5</div>
+                <div class="question-text">
+                    Analise os seguintes valores gasométricos:
+                    <div class="gasometry-values">
+                        <div><strong>pH:</strong> 7,30</div>
+                        <div><strong>PaCO₂:</strong> 68 mmHg</div>
+                        <div><strong>HCO₃⁻:</strong> 25 mEq/L</div>
+                    </div>
+                    Qual é o distúrbio ácido-base?
+                </div>
+                <ul class="options">
+                    <li class="option" data-answer="a">Acidose Respiratória</li>
+                    <li class="option" data-answer="b">Acidose Metabólica</li>
+                    <li class="option" data-answer="c">Alcalose Respiratória</li>
+                    <li class="option" data-answer="d">Alcalose Metabólica</li>
+                </ul>
+                <div class="explanation">
+                    <h4>Raciocínio:</h4>
+                    <div class="step">1° Passo: pH = 7,30 (< 7,35) → ACIDOSE</div>
+                    <div class="step">2° Passo: PaCO₂ = 68 mmHg (> 45) → MUITO ELEVADO</div>
+                    <div class="step">3° Passo: HCO₃⁻ = 25 mEq/L (normal)</div>
+                    <div class="step"><strong>Conclusão:</strong> Acidose + PaCO₂ muito elevado = ACIDOSE RESPIRATÓRIA</div>
+                </div>
+            </div>
+
+            <!-- Questão 6 -->
+            <div class="question" data-question="6">
+                <div class="question-number">Questão 6</div>
+                <div class="question-text">
+                    Analise os seguintes valores gasométricos:
+                    <div class="gasometry-values">
+                        <div><strong>pH:</strong> 7,22</div>
+                        <div><strong>PaCO₂:</strong> 40 mmHg</div>
+                        <div><strong>HCO₃⁻:</strong> 16 mEq/L</div>
+                    </div>
+                    Qual é o distúrbio ácido-base?
+                </div>
+                <ul class="options">
+                    <li class="option" data-answer="a">Acidose Respiratória</li>
+                    <li class="option" data-answer="b">Acidose Metabólica</li>
+                    <li class="option" data-answer="c">Alcalose Respiratória</li>
+                    <li class="option" data-answer="d">Alcalose Metabólica</li>
+                </ul>
+                <div class="explanation">
+                    <h4>Raciocínio:</h4>
+                    <div class="step">1° Passo: pH = 7,22 (< 7,35) → ACIDOSE</div>
+                    <div class="step">2° Passo: HCO₃⁻ = 16 mEq/L (< 22) → BAIXO</div>
+                    <div class="step">3° Passo: PaCO₂ = 40 mmHg (normal)</div>
+                    <div class="step"><strong>Conclusão:</strong> Acidose + HCO₃⁻ baixo = ACIDOSE METABÓLICA</div>
+                </div>
+            </div>
+
+            <!-- Questão 7 -->
+            <div class="question" data-question="7">
+                <div class="question-number">Questão 7</div>
+                <div class="question-text">
+                    Analise os seguintes valores gasométricos:
+                    <div class="gasometry-values">
+                        <div><strong>pH:</strong> 7,48</div>
+                        <div><strong>PaCO₂:</strong> 32 mmHg</div>
+                        <div><strong>HCO₃⁻:</strong> 24 mEq/L</div>
+                    </div>
+                    Qual é o distúrbio ácido-base?
+                </div>
+                <ul class="options">
+                    <li class="option" data-answer="a">Acidose Respiratória</li>
+                    <li class="option" data-answer="b">Acidose Metabólica</li>
+                    <li class="option" data-answer="c">Alcalose Respiratória</li>
+                    <li class="option" data-answer="d">Alcalose Metabólica</li>
+                </ul>
+                <div class="explanation">
+                    <h4>Raciocínio:</h4>
+                    <div class="step">1° Passo: pH = 7,48 (> 7,45) → ALCALOSE</div>
+                    <div class="step">2° Passo: PaCO₂ = 32 mmHg (< 35) → BAIXO</div>
+                    <div class="step">3° Passo: HCO₃⁻ = 24 mEq/L (normal)</div>
+                    <div class="step"><strong>Conclusão:</strong> Alcalose + PaCO₂ baixo = ALCALOSE RESPIRATÓRIA</div>
+                </div>
+            </div>
+
+            <!-- Questão 8 -->
+            <div class="question" data-question="8">
+                <div class="question-number">Questão 8</div>
+                <div class="question-text">
+                    Analise os seguintes valores gasométricos:
+                    <div class="gasometry-values">
+                        <div><strong>pH:</strong> 7,55</div>
+                        <div><strong>PaCO₂:</strong> 44 mmHg</div>
+                        <div><strong>HCO₃⁻:</strong> 38 mEq/L</div>
+                    </div>
+                    Qual é o distúrbio ácido-base?
+                </div>
+                <ul class="options">
+                    <li class="option" data-answer="a">Acidose Respiratória</li>
+                    <li class="option" data-answer="b">Acidose Metabólica</li>
+                    <li class="option" data-answer="c">Alcalose Respiratória</li>
+                    <li class="option" data-answer="d">Alcalose Metabólica</li>
+                </ul>
+                <div class="explanation">
+                    <h4>Raciocínio:</h4>
+                    <div class="step">1° Passo: pH = 7,55 (> 7,45) → ALCALOSE</div>
+                    <div class="step">2° Passo: HCO₃⁻ = 38 mEq/L (> 26) → MUITO ELEVADO</div>
+                    <div class="step">3° Passo: PaCO₂ = 44 mmHg (normal)</div>
+                    <div class="step"><strong>Conclusão:</strong> Alcalose + HCO₃⁻ muito elevado = ALCALOSE METABÓLICA</div>
+                </div>
+            </div>
+
+            <!-- Questão 9 -->
+            <div class="question" data-question="9">
+                <div class="question-number">Questão 9</div>
+                <div class="question-text">
+                    Analise os seguintes valores gasométricos:
+                    <div class="gasometry-values">
+                        <div><strong>pH:</strong> 7,18</div>
+                        <div><strong>PaCO₂:</strong> 38 mmHg</div>
+                        <div><strong>HCO₃⁻:</strong> 14 mEq/L</div>
+                    </div>
+                    Qual é o distúrbio ácido-base?
+                </div>
+                <ul class="options">
+                    <li class="option" data-answer="a">Acidose Respiratória</li>
+                    <li class="option" data-answer="b">Acidose Metabólica</li>
+                    <li class="option" data-answer="c">Alcalose Respiratória</li>
+                    <li class="option" data-answer="d">Alcalose Metabólica</li>
+                </ul>
+                <div class="explanation">
+                    <h4>Raciocínio:</h4>
+                    <div class="step">1° Passo: pH = 7,18 (< 7,35) → ACIDOSE SEVERA</div>
+                    <div class="step">2° Passo: HCO₃⁻ = 14 mEq/L (< 22) → BAIXO</div>
+                    <div class="step">3° Passo: PaCO₂ = 38 mmHg (normal)</div>
+                    <div class="step"><strong>Conclusão:</strong> Acidose + HCO₃⁻ baixo = ACIDOSE METABÓLICA</div>
+                </div>
+            </div>
+
+            <!-- Questão 10 -->
+            <div class="question" data-question="10">
+                <div class="question-number">Questão 10</div>
+                <div class="question-text">
+                    Analise os seguintes valores gasométricos:
+                    <div class="gasometry-values">
+                        <div><strong>pH:</strong> 7,60</div>
+                        <div><strong>PaCO₂:</strong> 25 mmHg</div>
+                        <div><strong>HCO₃⁻:</strong> 24 mEq/L</div>
+                    </div>
+                    Qual é o distúrbio ácido-base?
+                </div>
+                <ul class="options">
+                    <li class="option" data-answer="a">Acidose Respiratória</li>
+                    <li class="option" data-answer="b">Acidose Metabólica</li>
+                    <li class="option" data-answer="c">Alcalose Respiratória</li>
+                    <li class="option" data-answer="d">Alcalose Metabólica</li>
+                </ul>
+                <div class="explanation">
+                    <h4>Raciocínio:</h4>
+                    <div class="step">1° Passo: pH = 7,60 (> 7,45) → ALCALOSE SEVERA</div>
+                    <div class="step">2° Passo: PaCO₂ = 25 mmHg (< 35) → MUITO BAIXO</div>
+                    <div class="step">3° Passo: HCO₃⁻ = 24 mEq/L (normal)</div>
+                    <div class="step"><strong>Conclusão:</strong> Alcalose + PaCO₂ muito baixo = ALCALOSE RESPIRATÓRIA</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quiz-footer">
+            <div class="final-score" id="finalScore">Quiz em andamento... 📝</div>
+            <button class="reset-button-footer" onclick="resetQuiz()">🔄 Reiniciar Quiz</button>
+        </div>
+
+        <div class="copyright">
+            <p>© 2025 Wárreno Hendrick Costa Lima Guimarães. Todos os direitos reservados.</p>
+        </div>
+    </div>
+
+    <script>
+        let score = 0;
+        let totalQuestions = 10;
+        let answeredQuestions = new Set();
+
+        const correctAnswers = {
+            1: 'a', // Acidose Respiratória
+            2: 'b', // Acidose Metabólica
+            3: 'c', // Alcalose Respiratória
+            4: 'd', // Alcalose Metabólica
+            5: 'a', // Acidose Respiratória
+            6: 'b', // Acidose Metabólica
+            7: 'c', // Alcalose Respiratória
+            8: 'd', // Alcalose Metabólica
+            9: 'b', // Acidose Metabólica
+            10: 'c' // Alcalose Respiratória
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const options = document.querySelectorAll('.option');
+            
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    const question = this.closest('.question');
+                    const questionNumber = parseInt(question.dataset.question);
+                    const selectedAnswer = this.dataset.answer;
+                    const correctAnswer = correctAnswers[questionNumber];
+                    const explanation = question.querySelector('.explanation');
+                    
+                    // Remove previous selections in this question
+                    question.querySelectorAll('.option').forEach(opt => {
+                        opt.classList.remove('selected', 'correct');
+                    });
+                    
+                    // Mark selected option
+                    this.classList.add('selected');
+                    
+                    // Mark correct answer
+                    const correctOption = question.querySelector(`[data-answer="${correctAnswer}"]`);
+                    correctOption.classList.add('correct');
+                    
+                    // Show explanation
+                    explanation.classList.add('show');
+                    
+                    // Update score
+                    if (!answeredQuestions.has(questionNumber)) {
+                        answeredQuestions.add(questionNumber);
+                        if (selectedAnswer === correctAnswer) {
+                            score++;
+                        }
+                        updateScore();
+                    }
+                    
+                    // Disable further clicks on this question
+                    question.querySelectorAll('.option').forEach(opt => {
+                        opt.style.pointerEvents = 'none';
+                    });
+                });
+            });
+        });
+
+        function updateScore() {
+            const scoreElement = document.getElementById('score');
+            const finalScoreElement = document.getElementById('finalScore');
+            
+            scoreElement.textContent = `Pontuação: ${score}/${totalQuestions}`;
+            
+            if (answeredQuestions.size === totalQuestions) {
+                const percentage = (score / totalQuestions) * 100;
+                let message = '';
+                let emoji = '';
+                
+                if (percentage >= 90) {
+                    message = 'Excelente!';
+                    emoji = '🏆';
+                } else if (percentage >= 70) {
+                    message = 'Muito Bom!';
+                    emoji = '👏';
+                } else if (percentage >= 50) {
+                    message = 'Bom!';
+                    emoji = '👍';
+                } else {
+                    message = 'Continue estudando!';
+                    emoji = '📚';
+                }
+                
+                scoreElement.textContent += ` - ${message} ${emoji}`;
+                scoreElement.style.background = percentage >= 70 ? '#27ae60' : percentage >= 50 ? '#f39c12' : '#e74c3c';
+                
+                // Update footer score
+                finalScoreElement.textContent = `Quiz Finalizado! Pontuação: ${score}/${totalQuestions} (${percentage.toFixed(0)}%) - ${message} ${emoji}`;
+                finalScoreElement.style.background = percentage >= 70 ? '#27ae60' : percentage >= 50 ? '#f39c12' : '#e74c3c';
+            } else {
+                // Update progress in footer
+                finalScoreElement.textContent = `Progresso: ${answeredQuestions.size}/${totalQuestions} questões respondidas 📝`;
+                finalScoreElement.style.background = '#2c3e50';
+            }
+        }
+
+        function resetQuiz() {
+            // Reset variables
+            score = 0;
+            answeredQuestions.clear();
+            
+            // Reset score display
+            const scoreElement = document.getElementById('score');
+            const finalScoreElement = document.getElementById('finalScore');
+            
+            scoreElement.textContent = 'Pontuação: 0/10';
+            scoreElement.style.background = '#2c3e50';
+            
+            finalScoreElement.textContent = 'Quiz em andamento... 📝';
+            finalScoreElement.style.background = '#2c3e50';
+            
+            // Reset all questions
+            const questions = document.querySelectorAll('.question');
+            questions.forEach(question => {
+                // Remove all selections and correct markings
+                question.querySelectorAll('.option').forEach(option => {
+                    option.classList.remove('selected', 'correct');
+                    option.style.pointerEvents = 'auto';
+                });
+                
+                // Hide explanations
+                const explanation = question.querySelector('.explanation');
+                explanation.classList.remove('show');
+            });
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
+                
